@@ -1,0 +1,816 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Behavior Analysis Dashboard</title>
+    <style>
+      :root {
+        --border: #e2e8f0;
+        --border-strong: #cbd5e1;
+        --surface-0: #ffffff;
+        --surface-1: #f8fafc;
+        --surface-2: #ffffff;
+        --text-primary: #1e293b;
+        --text-secondary: #475569;
+        --text-muted: #64748b;
+        --bg-accent: #eff6ff;
+        --border-accent: #bfdbfe;
+        --text-accent: #1e40af;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+          Arial, sans-serif;
+        color: var(--text-primary);
+        background-color: #f1f5f9;
+        padding: 2rem;
+        margin: 0;
+        display: flex;
+        justify-content: center;
+      }
+
+      .dashboard-container {
+        background: var(--surface-0);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 24px;
+        max-width: 850px;
+        width: 100%;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      }
+
+      /* Header Grid for Images */
+      .header-images {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        margin-bottom: 24px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .header-img-wrapper {
+        display: flex;
+        flex: 1;
+      }
+
+      .header-img-wrapper.left {
+        justify-content: flex-start;
+      }
+      .header-img-wrapper.right {
+        justify-content: flex-end;
+      }
+
+      .header-img-wrapper img {
+        max-height: 60px;
+        object-fit: contain;
+      }
+
+      .sbtn {
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        border: 1px solid var(--border-strong);
+        background: var(--surface-0);
+        color: var(--text-primary);
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.2s;
+        font-family: inherit;
+      }
+      .sbtn.active {
+        background: var(--text-primary);
+        border-color: var(--text-primary);
+        color: var(--surface-0);
+      }
+      .sbtn:hover:not(.active) {
+        border-color: var(--text-primary);
+        background: var(--surface-1);
+      }
+
+      .grid-top {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 16px;
+        margin-bottom: 16px;
+      }
+
+      .panel {
+        background: var(--surface-1);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 16px;
+      }
+
+      .panel-title {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--text-muted);
+        margin-bottom: 10px;
+        letter-spacing: 0.05em;
+      }
+
+      .risk-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 20px 16px;
+      }
+
+      .fbg {
+        height: 8px;
+        background: #e2e8f0;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-top: 4px;
+        margin-bottom: 6px;
+      }
+      .ffill {
+        height: 100%;
+        border-radius: 4px;
+        width: 0%;
+        transition: width 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .feature-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        column-gap: 24px;
+        row-gap: 14px;
+      }
+
+      .feature-desc {
+        font-size: 11px;
+        color: var(--text-muted);
+        line-height: 1.4;
+      }
+
+      .how-it-works-box {
+        font-size: 12px;
+        color: var(--text-secondary);
+        line-height: 1.6;
+        padding: 14px 16px;
+        background: var(--bg-accent);
+        border-radius: 8px;
+        border-left: 4px solid #3b82f6;
+        margin-top: 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="dashboard-container">
+      <div class="header-images">
+        <div class="header-img-wrapper left">
+          <img src="Logo Syntova.png" alt="Syntova Logo Left" />2
+        </div>
+        <div class="header-img-wrapper right">
+          <img src="SAN.png" alt="Syntova AI Nexus Logo Right" />
+        </div>
+      </div>
+
+      <h2 class="sr-only" style="display: none">
+        Behavior analysis and risk scoring — interactive scenario explorer
+      </h2>
+
+      <div
+        id="sbtns"
+        style="
+          display: flex;
+          justify-content: center;
+          gap: 8px;
+          flex-wrap: wrap;
+          margin-bottom: 20px;
+        "
+      ></div>
+
+      <div class="grid-top">
+        <div class="panel">
+          <div class="panel-title">PRISON YARD — OVERHEAD VIEW</div>
+          <svg
+            id="yd"
+            width="100%"
+            viewBox="0 0 280 220"
+            style="
+              border-radius: 6px;
+              background: #fff;
+              border: 1px solid var(--border);
+            "
+          >
+            <rect
+              x="8"
+              y="8"
+              width="264"
+              height="204"
+              rx="6"
+              fill="#E24B4A"
+              fill-opacity=".04"
+            />
+            <rect
+              x="24"
+              y="24"
+              width="232"
+              height="172"
+              rx="4"
+              fill="#ffffff"
+            />
+            <rect
+              x="8"
+              y="8"
+              width="264"
+              height="204"
+              rx="6"
+              fill="none"
+              stroke="#E24B4A"
+              stroke-opacity=".2"
+              stroke-width="1"
+              stroke-dasharray="3 3"
+            />
+            <text
+              x="14"
+              y="20"
+              font-size="8"
+              fill="#A32D2D"
+              opacity=".5"
+              style="font-family: sans-serif; font-weight: 500"
+            >
+              perimeter zone
+            </text>
+            <text
+              x="140"
+              y="114"
+              text-anchor="middle"
+              font-size="9"
+              fill="#64748b"
+              opacity=".3"
+              style="font-family: sans-serif; font-weight: 500"
+            >
+              safe zone
+            </text>
+            <g id="trails"></g>
+            <g id="persons"></g>
+          </svg>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 16px">
+          <div class="panel risk-box">
+            <div
+              style="
+                font-size: 11px;
+                font-weight: 600;
+                color: var(--text-muted);
+                letter-spacing: 0.05em;
+                margin-bottom: 4px;
+              "
+            >
+              RISK SCORE
+            </div>
+            <div
+              id="rval"
+              style="
+                font-size: 56px;
+                font-weight: 700;
+                line-height: 1;
+                transition: color 0.4s;
+                font-variant-numeric: tabular-nums;
+              "
+            >
+              15
+            </div>
+            <div
+              id="rlabel"
+              style="
+                font-size: 13px;
+                font-weight: 600;
+                margin-top: 8px;
+                transition: color 0.4s;
+              "
+            >
+              Safe — no action
+            </div>
+
+            <div
+              style="
+                margin-top: 16px;
+                width: 100%;
+                height: 6px;
+                border-radius: 3px;
+                background: linear-gradient(
+                  to right,
+                  #22c55e,
+                  #eab308,
+                  #ef4444
+                );
+                position: relative;
+              "
+            >
+              <div
+                id="needle"
+                style="
+                  position: absolute;
+                  top: -6px;
+                  width: 16px;
+                  height: 16px;
+                  background: #ffffff;
+                  border: 2px solid var(--border-strong);
+                  border-radius: 50%;
+                  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+                  transition: left 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+                  transform: translateX(-50%);
+                  left: 15%;
+                "
+              ></div>
+            </div>
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                font-size: 10px;
+                color: var(--text-muted);
+                margin-top: 6px;
+                width: 100%;
+              "
+            >
+              <span>0 — Safe</span><span>50</span><span>100 — Critical</span>
+            </div>
+          </div>
+
+          <div
+            id="sdesc"
+            style="
+              font-size: 13px;
+              color: var(--text-secondary);
+              line-height: 1.5;
+              background: var(--surface-1);
+              border: 1px solid var(--border);
+              border-radius: 10px;
+              padding: 16px;
+              flex: 1;
+              display: flex;
+              align-items: center;
+            "
+          ></div>
+        </div>
+      </div>
+
+      <div class="panel" style="padding: 16px 20px">
+        <div class="panel-title" style="margin-bottom: 16px">
+          FEATURE BREAKDOWN — weighted inputs to risk score
+        </div>
+        <div id="fbars" class="feature-grid"></div>
+      </div>
+
+      <div id="howitworks" class="how-it-works-box"></div>
+    </div>
+
+    <script>
+      const SC = [
+        {
+          n: "Normal movement",
+          r: 15,
+          c: "#22c55e",
+          l: "Safe — no action",
+          d: "Guard and inmates moving at normal pace through the yard. No proximity violations, no restricted zone contact, no unusual poses. System is in passive monitoring mode.",
+          px: [
+            {
+              x: 120,
+              y: 108,
+              c: "#22c55e",
+              tr: [
+                [108, 116],
+                [114, 112],
+                [120, 108],
+              ],
+            },
+            {
+              x: 164,
+              y: 132,
+              c: "#22c55e",
+              tr: [
+                [150, 140],
+                [157, 136],
+                [164, 132],
+              ],
+            },
+            {
+              x: 76,
+              y: 86,
+              c: "#22c55e",
+              tr: [
+                [70, 94],
+                [73, 90],
+                [76, 86],
+              ],
+            },
+          ],
+          ft: [
+            {
+              n: "Pose score",
+              v: 10,
+              c: "#22c55e",
+              d: "Upright posture, normal limb angles — no aggression",
+            },
+            {
+              n: "Speed score",
+              v: 12,
+              c: "#22c55e",
+              d: "Walking pace (0.8–1.2 m/s), no acceleration spikes",
+            },
+            {
+              n: "Proximity score",
+              v: 18,
+              c: "#22c55e",
+              d: "All persons >2m apart, no crowd cluster",
+            },
+            {
+              n: "Zone score",
+              v: 20,
+              c: "#22c55e",
+              d: "All inside safe inner zone, nowhere near perimeter",
+            },
+          ],
+          hw: "At 1 fps minimum, MediaPipe Pose extracts 17 skeleton keypoints per person. These are fed into a trained LSTM model that classifies gait patterns. The zone overlay checks each bounding box centroid against a digital map of the yard. When all four scores are below their thresholds, the system logs the frame and moves on — no alert is fired.",
+        },
+
+        {
+          n: "Loitering",
+          r: 38,
+          c: "#eab308",
+          l: "Monitor",
+          d: "An inmate has been stationary within 1m of the perimeter wall for over 5 minutes. No aggression detected, but sustained perimeter dwell time raises a flag.",
+          px: [
+            {
+              x: 20,
+              y: 58,
+              c: "#eab308",
+              tr: [
+                [20, 63],
+                [20, 61],
+                [20, 58],
+              ],
+            },
+            {
+              x: 144,
+              y: 118,
+              c: "#22c55e",
+              tr: [
+                [132, 125],
+                [138, 121],
+                [144, 118],
+              ],
+            },
+          ],
+          ft: [
+            {
+              n: "Pose score",
+              v: 14,
+              c: "#22c55e",
+              d: "Upright, stationary — no aggressive posture",
+            },
+            {
+              n: "Speed score",
+              v: 6,
+              c: "#22c55e",
+              d: "Near-zero velocity for 5+ minutes",
+            },
+            {
+              n: "Proximity score",
+              v: 22,
+              c: "#22c55e",
+              d: "Single person — no grouping",
+            },
+            {
+              n: "Zone score",
+              v: 82,
+              c: "#eab308",
+              d: "Within 1m of perimeter wall — sustained dwell",
+            },
+          ],
+          hw: "Trajectory analysis stores each person's centroid in a rolling 300-frame buffer (5 min at 1fps). If the standard deviation of positions over that window is <0.5m, a loitering flag is raised. A digital zone map defines 'perimeter proximity' as any point within 1.5m of the yard boundary. Time-in-zone is tracked cumulatively — even brief exits and re-entries count.",
+        },
+
+        {
+          n: "Group gathering",
+          r: 56,
+          c: "#f97316",
+          l: "Warning",
+          d: "Four inmates have formed a tight static cluster in the center of the yard and held position for over 90 seconds. Crowd formation is a pre-incident indicator.",
+          px: [
+            {
+              x: 128,
+              y: 104,
+              c: "#f97316",
+              tr: [
+                [114, 114],
+                [121, 109],
+                [128, 104],
+              ],
+            },
+            {
+              x: 150,
+              y: 100,
+              c: "#f97316",
+              tr: [
+                [165, 110],
+                [158, 105],
+                [150, 100],
+              ],
+            },
+            {
+              x: 138,
+              y: 120,
+              c: "#f97316",
+              tr: [
+                [150, 130],
+                [144, 125],
+                [138, 120],
+              ],
+            },
+            {
+              x: 156,
+              y: 116,
+              c: "#f97316",
+              tr: [
+                [170, 126],
+                [163, 121],
+                [156, 116],
+              ],
+            },
+            {
+              x: 76,
+              y: 78,
+              c: "#22c55e",
+              tr: [
+                [71, 83],
+                [73, 80],
+                [76, 78],
+              ],
+            },
+          ],
+          ft: [
+            {
+              n: "Pose score",
+              v: 32,
+              c: "#f97316",
+              d: "Some agitated gesturing observed in cluster",
+            },
+            {
+              n: "Speed score",
+              v: 40,
+              c: "#f97316",
+              d: "Individuals converged quickly to form group",
+            },
+            {
+              n: "Proximity score",
+              v: 85,
+              c: "#ef4444",
+              d: "4 persons within 1.5m² area — crowd density flag",
+            },
+            {
+              n: "Zone score",
+              v: 26,
+              c: "#22c55e",
+              d: "Center of yard — no perimeter proximity",
+            },
+          ],
+          hw: "Crowd density is computed as: for each person, count all others within a 1.5m radius. If any individual has 3+ neighbors and the cluster holds for >60 seconds, a gathering event is triggered. The rate of cluster formation also matters — a group that assembles in under 10 seconds scores higher than one that drifts together over 2 minutes. Guards receive a non-urgent monitor alert.",
+        },
+
+        {
+          n: "Heated argument",
+          r: 72,
+          c: "#f97316",
+          l: "High risk — guard alert",
+          d: "Two inmates face-to-face at <0.5m distance, both showing rapid upper-limb movement and forward-lean posture. Classic pre-fight indicators. Guard alerted immediately.",
+          px: [
+            {
+              x: 128,
+              y: 108,
+              c: "#ef4444",
+              tr: [
+                [118, 115],
+                [123, 112],
+                [128, 108],
+              ],
+            },
+            {
+              x: 152,
+              y: 112,
+              c: "#ef4444",
+              tr: [
+                [163, 118],
+                [157, 115],
+                [152, 112],
+              ],
+            },
+            {
+              x: 56,
+              y: 154,
+              c: "#22c55e",
+              tr: [
+                [52, 158],
+                [54, 156],
+                [56, 154],
+              ],
+            },
+          ],
+          ft: [
+            {
+              n: "Pose score",
+              v: 78,
+              c: "#ef4444",
+              d: "Rapid arm raises, forward-lean, head tilted — aggression posture",
+            },
+            {
+              n: "Speed score",
+              v: 68,
+              c: "#f97316",
+              d: "Upper-limb angular velocity >180°/sec",
+            },
+            {
+              n: "Proximity score",
+              v: 84,
+              c: "#ef4444",
+              d: "Two persons within 0.5m, facing each other",
+            },
+            {
+              n: "Zone score",
+              v: 58,
+              c: "#f97316",
+              d: "Mid-yard — no quick route for staff from post",
+            },
+          ],
+          hw: "Upper-limb angular velocity is derived from wrist and elbow keypoint deltas across frames. When two skeletons are within 0.8m, their shoulder-to-shoulder vectors are compared — if they point toward each other (dot product >0.7), 'confrontational orientation' is flagged. This combined with wrist velocity >180°/sec classifies as 'aggressive posture'. A high-priority alert is pushed to guard radios and the dashboard.",
+        },
+
+        {
+          n: "Physical fight",
+          r: 91,
+          c: "#ef4444",
+          l: "Critical — intervene now",
+          d: "High-velocity limb contact confirmed between two individuals. Skeleton of one person is now horizontal — fall detected. Siren triggered, all guards dispatched, 30-second pre-event clip auto-saved.",
+          px: [
+            {
+              x: 130,
+              y: 108,
+              c: "#ef4444",
+              tr: [
+                [118, 118],
+                [124, 113],
+                [130, 108],
+              ],
+            },
+            {
+              x: 150,
+              y: 136,
+              c: "#ef4444",
+              tr: [
+                [158, 124],
+                [154, 128],
+                [150, 136],
+              ],
+            },
+            {
+              x: 56,
+              y: 154,
+              c: "#22c55e",
+              tr: [
+                [51, 158],
+                [53, 156],
+                [56, 154],
+              ],
+            },
+          ],
+          ft: [
+            {
+              n: "Pose score",
+              v: 96,
+              c: "#ef4444",
+              d: "One skeleton horizontal — fall confirmed by keypoint heights",
+            },
+            {
+              n: "Speed score",
+              v: 94,
+              c: "#ef4444",
+              d: "Wrist acceleration >1000 units/s² — impact detected",
+            },
+            {
+              n: "Proximity score",
+              v: 96,
+              c: "#ef4444",
+              d: "Bounding boxes fully overlapping — contact",
+            },
+            {
+              n: "Zone score",
+              v: 78,
+              c: "#ef4444",
+              d: "Mid-yard — no natural barrier, all guards needed",
+            },
+          ],
+          hw: "Fall detection triggers when a person's center-of-mass keypoint drops below 60% of their average standing height over the past 30 frames, AND torso keypoints (shoulders, hips) become horizontal (angle <20° from floor). Combined with wrist acceleration spikes and bounding box overlap between two persons, the fight classifier fires at confidence >0.9. The system simultaneously: triggers the PA siren, notifies all on-duty guards via radio push, saves a 30-second pre-event clip to the evidence archive, and creates an incident report with timestamped metadata.",
+        },
+      ];
+
+      let prev = 15;
+
+      const names = SC.map((s) => s.n);
+      const bc = document.getElementById("sbtns");
+      names.forEach((n, i) => {
+        const b = document.createElement("button");
+        b.className = "sbtn" + (i === 0 ? " active" : "");
+        b.textContent = n;
+        b.onclick = () => setS(i);
+        bc.appendChild(b);
+      });
+
+      function animN(el, from, to) {
+        const t0 = performance.now();
+        const go = (t) => {
+          const p = Math.min((t - t0) / 650, 1),
+            e = 1 - Math.pow(1 - p, 3);
+          el.textContent = Math.round(from + (to - from) * e);
+          if (p < 1) requestAnimationFrame(go);
+        };
+        requestAnimationFrame(go);
+      }
+
+      function setS(i) {
+        document
+          .querySelectorAll(".sbtn")
+          .forEach((b, j) => b.classList.toggle("active", j === i));
+        const s = SC[i];
+        const rv = document.getElementById("rval");
+        animN(rv, prev, s.r);
+        prev = s.r;
+        rv.style.color = s.c;
+        const rl = document.getElementById("rlabel");
+        rl.textContent = s.l;
+        rl.style.color = s.c;
+        document.getElementById("needle").style.left = s.r + "%";
+        document.getElementById("sdesc").textContent = s.d;
+        document.getElementById("howitworks").innerHTML =
+          '<strong style="color:var(--text-primary)">How the AI detects this: </strong>' +
+          s.hw;
+
+        const tg = document.getElementById("trails"),
+          pg = document.getElementById("persons");
+        tg.innerHTML = "";
+        pg.innerHTML = "";
+        const ns = "http://www.w3.org/2000/svg";
+        s.px.forEach((p) => {
+          if (p.tr)
+            p.tr.forEach((pt, ti) => {
+              if (ti === p.tr.length - 1) return;
+              const ln = document.createElementNS(ns, "line");
+              ln.setAttribute("x1", pt[0]);
+              ln.setAttribute("y1", pt[1]);
+              ln.setAttribute("x2", p.tr[ti + 1][0]);
+              ln.setAttribute("y2", p.tr[ti + 1][1]);
+              ln.setAttribute("stroke", p.c);
+              ln.setAttribute("stroke-width", "2");
+              ln.setAttribute(
+                "stroke-opacity",
+                (((ti + 1) / p.tr.length) * 0.5).toString(),
+              );
+              tg.appendChild(ln);
+            });
+          const g = document.createElementNS(ns, "g");
+          const co = document.createElementNS(ns, "circle");
+          co.setAttribute("cx", p.x);
+          co.setAttribute("cy", p.y);
+          co.setAttribute("r", "10");
+          co.setAttribute("fill", p.c);
+          co.setAttribute("fill-opacity", ".15");
+          co.setAttribute("stroke", p.c);
+          co.setAttribute("stroke-width", "1.5");
+          g.appendChild(co);
+          const d = document.createElementNS(ns, "circle");
+          d.setAttribute("cx", p.x);
+          d.setAttribute("cy", p.y);
+          d.setAttribute("r", "3");
+          d.setAttribute("fill", p.c);
+          g.appendChild(d);
+          pg.appendChild(g);
+        });
+
+        const fb = document.getElementById("fbars");
+        fb.innerHTML = "";
+        s.ft.forEach((f) => {
+          const dv = document.createElement("div");
+          dv.style.cssText = "display:flex;flex-direction:column;gap:2px";
+          dv.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:baseline;font-size:13px"><span style="color:var(--text-secondary);font-weight:500;">${f.n}</span><span style="color:${f.c};font-weight:600;font-variant-numeric:tabular-nums;font-size:14px;">${f.v}</span></div><div class="fbg"><div class="ffill" style="background:${f.c}"></div></div><div class="feature-desc">${f.d}</div>`;
+          fb.appendChild(dv);
+          setTimeout(() => {
+            dv.querySelector(".ffill").style.width = f.v + "%";
+          }, 60);
+        });
+      }
+
+      setS(0);
+    </script>
+  </body>
+</html>
